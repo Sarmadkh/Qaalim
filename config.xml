@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.qaalim.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets">
+    <name>Qaalim</name>
+    <description>Urdu Columns Reader</description>
+    <author email="you@email.com" href="http://example.com">Your Name</author>
+    <content src="index.html" />
+    <access origin="*" />
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+</widget>
