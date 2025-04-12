@@ -4,14 +4,14 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4  # Updated from v2 to v4
+    - uses: actions/checkout@v4
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4  # Updated from v2 to v4
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'  # Updated to current LTS
 
     - name: Install Cordova
       run: npm install -g cordova
@@ -25,14 +25,16 @@ jobs:
     - name: Add Android Platform
       working-directory: ./Qaalim
       run: |
-        cordova platform add android@13.0.0  # Updated Android platform version
+        cordova platform add android@14.0.0  # Latest Android platform
+        yes | sdkmanager --licenses  # Accept Android licenses
 
     - name: Build APK
       working-directory: ./Qaalim
-      run: cordova build android
+      run: |
+        cordova build android -- --packageType=apk
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3  # Changed from v2 to v3
+      uses: actions/upload-artifact@v4  # Updated to v4
       with:
         name: qaalim-app
-        path: Qaalim/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        path: Qaalim/platforms/android/app/build/outputs/apk/**/*.apk
