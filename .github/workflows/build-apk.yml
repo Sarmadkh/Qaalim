@@ -20,7 +20,7 @@ jobs:
     - name: Install Ionic/Cordova
       run: |
         npm install -g @ionic/cli cordova
-        npm ci
+        npm install  # Changed from "npm ci"
 
     - name: Add Android Platform
       run: |
