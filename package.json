@@ -1,0 +1,9 @@
+{
+  "name": "qaalim",
+  "version": "1.0.0",
+  "dependencies": {
+    "@ionic/core": "^latest",
+    "@ionic/cli": "^latest",
+    "cordova": "^latest"
+  }
+}
