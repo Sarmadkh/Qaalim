@@ -19,7 +19,8 @@ jobs:
     - name: Create Cordova Project
       run: |
         cordova create Qaalim com.qaalim.app Qaalim
-        cp -r www/* Qaalim/www/
+        mkdir -p Qaalim/www  # Create target directory first
+        cp -r www/* Qaalim/www/ || true  # Ignore if empty
         cp config.xml Qaalim/
 
     - name: Add Android Platform
