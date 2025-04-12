@@ -16,10 +16,14 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       with:
-        cmdline-tools-version: '11.0'
-        build-tools-version: '35.0.0'
-        platform-version: 'android-35'
-        ndk-version: '25.2.9519653'
+        cmdline-tools-version: '12.0'  # Updated to valid version
+        packages: |
+          tools
+          platform-tools
+          build-tools;35.0.0
+          platforms;android-35
+          ndk;25.2.9519653
+        accept-android-sdk-licenses: true
 
     - name: Install Cordova
       run: npm install -g cordova
@@ -35,16 +39,13 @@ jobs:
       working-directory: ./Qaalim
       run: |
         cordova platform add android@14.0.0
-        # Force Cordova to use ANDROID_HOME
         echo "sdk.dir=$ANDROID_HOME" >> platforms/android/gradle.properties
 
     - name: Build APK
       working-directory: ./Qaalim
       run: |
-        # Clean existing builds
         cordova clean android
-        # Build with correct environment
-        ANDROID_SDK_ROOT= cordova build android -- --warning-mode all
+        cordova build android -- --warning-mode all
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
