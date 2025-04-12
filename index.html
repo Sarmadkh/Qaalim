@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Qaalim</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.4/tiny-slider.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <ion-app>
+    <!-- Main Content -->
+    <ion-content>
+      <ion-header>
+        <ion-toolbar>
+          <!-- Default Header Content -->
+          <div class="header-content" id="defaultHeader">
+            <ion-buttons slot="start">
+              <ion-button>
+                <span class="material-icons">notifications</span>
+              </ion-button>
+            </ion-buttons>
+      
+            <ion-title>Qaalim</ion-title>
+      
+            <ion-buttons slot="end">
+              <ion-button id="searchBtn">
+                <span class="material-icons">search</span>
+              </ion-button>
+            </ion-buttons>
+          </div>
+      
+          <!-- Search Bar -->
+          <div class="header-content" id="searchHeader" style="display: none;">
+            <ion-searchbar 
+              id="mainSearchBar"
+              animated="true"
+              show-cancel-button="focus"
+              placeholder="Search Articles..."
+            ></ion-searchbar>
+            <ion-buttons slot="end">
+              <ion-button onclick="toggleSearch()">
+                <span class="material-icons">close</span>
+              </ion-button>
+            </ion-buttons>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+
+      <!-- Main content area -->
+      <div id="homeContent">
+        <!-- Highlights Section with Carousel -->
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Highlights</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div class="highlights-slider-container">
+              <div id="highlightsSlider" class="highlights-slider">
+                <!-- Slider items will be inserted here by JavaScript -->
+                <div class="tns-item">
+                  <ion-skeleton-text animated style="width: 100%; height: 150px;"></ion-skeleton-text>
+                </div>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+        
+        <!-- Latest Section -->
+        <ion-card>
+          <ion-card-header>
+            <ion-toolbar>
+              <ion-title slot="start">
+                <ion-card-title>Latest</ion-card-title>
+                <ion-card-subtitle id="latestSubtitle">Today's columns</ion-card-subtitle>
+              </ion-title>
+              <ion-buttons slot="end">
+                <ion-button id="datePickerBtn">
+                  <span class="material-icons">calendar_month</span>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-card-header>
+
+          <ion-modal trigger="datePickerBtn">
+            <ion-header>
+              <ion-toolbar>
+                <ion-title>Select Date</ion-title>
+                <ion-buttons slot="end">
+                  <ion-button onclick="dismissDatePicker()">
+                    <span class="material-icons">close</span>
+                  </ion-button>
+                </ion-buttons>
+              </ion-toolbar>
+            </ion-header>
+            <ion-content class="ion-padding">
+              <ion-datetime id="latestDatePicker" presentation="date"></ion-datetime>
+              <ion-button expand="block" onclick="showTodaysArticles()">Today</ion-button>
+            </ion-content>
+          </ion-modal>
+
+          <ion-card-content>
+            <ion-list id="latestList">
+              <ion-item lines="none">
+                <ion-skeleton-text animated style="width: 100%; height: 80px;"></ion-skeleton-text>
+              </ion-item>
+            </ion-list>
+
+            <ion-infinite-scroll threshold="100px" id="authorInfiniteScroll">
+              <ion-infinite-scroll-content loading-spinner="bubbles" loading-text="Loading more...">
+              </ion-infinite-scroll-content>
+            </ion-infinite-scroll>
+
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Authors Page -->
+      <div id="authorsContent" style="display: none;">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Popular Authors</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-list id="authorsList">
+              <!-- Authors will be populated dynamically by JavaScript -->
+              <ion-item lines="none">
+                <ion-skeleton-text animated style="width: 100%; height: 60px;"></ion-skeleton-text>
+              </ion-item>
+            </ion-list>
+
+            <!-- Add infinite scroll component -->
+            <ion-infinite-scroll threshold="100px" id="authorsInfiniteScroll">
+              <ion-infinite-scroll-content loading-spinner="bubbles" loading-text="Loading more authors...">
+              </ion-infinite-scroll-content>
+            </ion-infinite-scroll>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Saved Articles Page -->
+      <div id="savedContent" style="display: none;">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Saved Articles</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-list id="savedList">
+              <ion-item lines="none" class="ion-text-center">
+                <ion-label>No saved articles yet</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="settingsContent" style="display: none;">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Settings</ion-card-title>
+          </ion-card-header>
+
+          <ion-card-content>
+            <ion-list>
+              <ion-item>
+                <ion-label>Dark Mode</ion-label>
+                <ion-toggle id="darkModeToggle"></ion-toggle>
+              </ion-item>
+              <ion-item>
+                <ion-label>Notifications</ion-label>
+                <ion-toggle checked></ion-toggle>
+              </ion-item>
+              <ion-item button>
+                <ion-label>Clear Cache</ion-label>
+              </ion-item>
+              <ion-item button>
+                <ion-label>About</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Article Detail Modal -->
+      <ion-modal id="articleModal">
+        <ion-content class="ion-padding">
+          <h1 id="articleDetailTitle"></h1>
+          <div class="article-meta">
+            <ion-chip onclick="handleAuthorChipClick('${article.author}')">
+              <i class="material-icons">person</i>
+              <ion-label id="articleDetailAuthor"></ion-label>
+            </ion-chip>
+
+            <ion-chip onclick="handleDateChipClick('${article.date}')">
+              <i class="material-icons">calendar_month</i>
+              <ion-label id="articleDetailDate"></ion-label>
+            </ion-chip>
+          </div>
+          <div id="articleDetailContent" class="article-content"></div>
+        </ion-content>
+
+        <!-- Bottom Toolbar -->
+        <ion-footer>
+          <ion-toolbar>
+            <ion-buttons slot="start">
+              <ion-button onclick="dismissArticleModal()">
+                <span class="material-icons">arrow_back</span>
+              </ion-button>
+            </ion-buttons>
+
+            <ion-buttons slot="end">
+              <ion-button id="shareArticleBtn">
+                <span class="material-icons">share</span>
+              </ion-button>
+              <ion-button id="saveArticleBtn">
+                <span class="material-icons">bookmark_border</span>
+              </ion-button>
+              <ion-button id="textSettingsBtn">
+                <span class="material-icons">text_fields</span>
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-footer>
+      </ion-modal>
+    </ion-content>
+
+    <!-- Bottom Tab Menu -->
+    <ion-tab-bar slot="bottom">
+      <ion-tab-button onclick="showTab('home')">
+        <span class="material-icons">home</span>
+        <ion-label>Home</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button onclick="showTab('authors')">
+        <span class="material-icons">people</span>
+        <ion-label>Authors</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button onclick="showTab('saved')">
+        <span class="material-icons">bookmark</span>
+        <ion-label>Saved</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button onclick="showTab('settings')">
+        <span class="material-icons">settings</span>
+        <ion-label>Settings</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+
+    <!-- Text Settings Modal -->
+    <ion-modal id="textSettingsModal" trigger="textSettingsBtn" class="ion-bottom-sheet">
+      <ion-content class="ion-padding">
+        <ion-list>
+          <ion-item>
+            <ion-label>Font Size</ion-label>
+            <div class="font-size-controls">
+              <ion-button id="decreaseFontBtn">
+                <span class="material-icons">remove</span>
+              </ion-button>
+              <span id="currentFontSize">3</span>
+              <ion-button id="increaseFontBtn">
+                <span class="material-icons">add</span>
+              </ion-button>
+            </div>
+          </ion-item>
+
+          <!-- Text Alignment -->
+          <ion-item>
+            <ion-label>Alignment</ion-label>
+            <div class="alignment-controls">
+              <ion-segment id="textAlignment" value="right">
+                <ion-segment-button value="left">
+                  <span class="material-icons">format_align_left</span>
+                </ion-segment-button>
+                <ion-segment-button value="center">
+                  <span class="material-icons">format_align_center</span>
+                </ion-segment-button>
+                <ion-segment-button value="right">
+                  <span class="material-icons">format_align_right</span>
+                </ion-segment-button>
+                <ion-segment-button value="justify">
+                  <span class="material-icons">format_align_justify</span>
+                </ion-segment-button>
+              </ion-segment>
+            </div>
+          </ion-item>
+
+          <!-- Auto Scroll Speed -->
+          <ion-item>
+            <ion-label>Scroll Speed</ion-label>
+            <ion-range id="scrollSpeed" min="0" max="5" step="1" snaps>
+              <span class="material-icons" slot="start">speed</span>
+              <span class="material-icons" slot="end">rocket_launch</span>
+            </ion-range>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ion-modal>
+
+  </ion-app>
+
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"></script>
+  <script nomodule="" src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.9.4/min/tiny-slider.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
