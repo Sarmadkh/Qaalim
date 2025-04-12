@@ -13,22 +13,13 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install Android SDK
-      run: |
-        mkdir -p ~/android-sdk
-        wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
-        unzip commandlinetools-linux-* -d ~/android-sdk/cmdline-tools
-        mv ~/android-sdk/cmdline-tools/cmdline-tools ~/android-sdk/cmdline-tools/latest
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-
-    - name: Accept Licenses
-      run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
-    - name: Install Android Platform
-      run: |
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0"
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: '11.0'
+        build-tools-version: '35.0.0'
+        platform-version: 'android-35'
+        ndk-version: '25.2.9519653'
 
     - name: Install Cordova
       run: npm install -g cordova
@@ -42,11 +33,18 @@ jobs:
 
     - name: Add Android Platform
       working-directory: ./Qaalim
-      run: cordova platform add android@14.0.0
+      run: |
+        cordova platform add android@14.0.0
+        # Force Cordova to use ANDROID_HOME
+        echo "sdk.dir=$ANDROID_HOME" >> platforms/android/gradle.properties
 
     - name: Build APK
       working-directory: ./Qaalim
-      run: cordova build android
+      run: |
+        # Clean existing builds
+        cordova clean android
+        # Build with correct environment
+        ANDROID_SDK_ROOT= cordova build android -- --warning-mode all
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
