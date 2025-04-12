@@ -1,54 +1,33 @@
 name: Build APK
 
-on: [push]
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: '12.0'  # Updated to valid version
-        packages: |
-          tools
-          platform-tools
-          build-tools;35.0.0
-          platforms;android-35
-          ndk;25.2.9519653
-        accept-android-sdk-licenses: true
+      - name: Install Cordova
+        run: npm install -g cordova
 
-    - name: Install Cordova
-      run: npm install -g cordova
+      - name: Add Android platform
+        run: cordova platform add android
 
-    - name: Create Cordova Project
-      run: |
-        cordova create Qaalim com.qaalim.app Qaalim
-        mkdir -p Qaalim/www
-        cp -r www/* Qaalim/www/ || true
-        cp config.xml Qaalim/
+      - name: Build APK
+        run: cordova build android --debug
 
-    - name: Add Android Platform
-      working-directory: ./Qaalim
-      run: |
-        cordova platform add android@14.0.0
-        echo "sdk.dir=$ANDROID_HOME" >> platforms/android/gradle.properties
-
-    - name: Build APK
-      working-directory: ./Qaalim
-      run: |
-        cordova clean android
-        cordova build android -- --warning-mode all
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: qaalim-app
-        path: Qaalim/platforms/android/app/build/outputs/apk/**/*.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
