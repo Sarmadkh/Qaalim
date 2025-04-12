@@ -11,7 +11,24 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'  # Updated to current LTS
+        node-version: '20'
+
+    - name: Install Android SDK
+      run: |
+        mkdir -p ~/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
+        unzip commandlinetools-linux-* -d ~/android-sdk/cmdline-tools
+        mv ~/android-sdk/cmdline-tools/cmdline-tools ~/android-sdk/cmdline-tools/latest
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+
+    - name: Accept Licenses
+      run: |
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+
+    - name: Install Android Platform
+      run: |
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
     - name: Install Cordova
       run: npm install -g cordova
@@ -19,23 +36,20 @@ jobs:
     - name: Create Cordova Project
       run: |
         cordova create Qaalim com.qaalim.app Qaalim
-        mkdir -p Qaalim/www  # Create target directory first
-        cp -r www/* Qaalim/www/ || true  # Ignore if empty
+        mkdir -p Qaalim/www
+        cp -r www/* Qaalim/www/ || true
         cp config.xml Qaalim/
 
     - name: Add Android Platform
       working-directory: ./Qaalim
-      run: |
-        cordova platform add android@14.0.0  # Latest Android platform
-        yes | sdkmanager --licenses  # Accept Android licenses
+      run: cordova platform add android@14.0.0
 
     - name: Build APK
       working-directory: ./Qaalim
-      run: |
-        cordova build android -- --packageType=apk
+      run: cordova build android
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4  # Updated to v4
+      uses: actions/upload-artifact@v4
       with:
         name: qaalim-app
         path: Qaalim/platforms/android/app/build/outputs/apk/**/*.apk
